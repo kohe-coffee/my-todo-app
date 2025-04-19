@@ -209,8 +209,8 @@ const TodoList: React.FC = () => {
               Todoリスト
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 4 }}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <TextField
                     fullWidth
@@ -227,7 +227,7 @@ const TodoList: React.FC = () => {
                     }}
                   />
                 </Box>
-                <Box sx={{ width: '200px' }}>
+                <Box sx={{ width: { xs: '100%', sm: '200px' } }}>
                   <FormControl fullWidth>
                     <InputLabel>並び替え</InputLabel>
                     <Select
@@ -247,20 +247,27 @@ const TodoList: React.FC = () => {
                 </Box>
               </Box>
 
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                 <TextField
                   fullWidth
                   variant="outlined"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder="新しいタスクを入力"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleAddTodo();
-                    }
-                  }}
+                  sx={{ flex: 1 }}
                 />
-                <FormControl sx={{ minWidth: 140 }}>
+                <Button
+                  variant="contained"
+                  onClick={handleAddTodo}
+                  startIcon={<AddIcon />}
+                  sx={{ width: { xs: '100%', sm: 'auto' } }}
+                >
+                  追加
+                </Button>
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                <FormControl sx={{ flex: 1 }}>
                   <InputLabel>カテゴリー</InputLabel>
                   <Select
                     value={selectedCategory}
@@ -271,14 +278,12 @@ const TodoList: React.FC = () => {
                       </InputAdornment>
                     }
                   >
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value="仕事">仕事</MenuItem>
+                    <MenuItem value="プライベート">プライベート</MenuItem>
+                    <MenuItem value="その他">その他</MenuItem>
                   </Select>
                 </FormControl>
-                <FormControl sx={{ minWidth: 140 }}>
+                <FormControl sx={{ flex: 1 }}>
                   <InputLabel>優先度</InputLabel>
                   <Select
                     value={selectedPriority}
@@ -289,127 +294,100 @@ const TodoList: React.FC = () => {
                       </InputAdornment>
                     }
                   >
-                    <MenuItem value="low">低</MenuItem>
-                    <MenuItem value="medium">中</MenuItem>
                     <MenuItem value="high">高</MenuItem>
+                    <MenuItem value="medium">中</MenuItem>
+                    <MenuItem value="low">低</MenuItem>
                   </Select>
                 </FormControl>
                 <DatePicker
                   label="期限"
                   value={dueDate}
                   onChange={(newValue) => setDueDate(newValue)}
-                  slotProps={{
-                    textField: {
-                      sx: { minWidth: 140 },
-                      InputProps: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <EventIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      },
-                    },
-                  }}
+                  sx={{ flex: 1 }}
                 />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAddTodo}
-                  startIcon={<AddIcon />}
-                  sx={{ height: 56, px: 3 }}
-                >
-                  追加
-                </Button>
               </Box>
-            </Box>
 
-            {isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
-              </Box>
-            ) : filteredAndSortedTodos.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <List sx={{ mt: 2 }}>
-                {filteredAndSortedTodos.map((todo) => (
-                  <ListItem
-                    key={todo.id}
-                    sx={{
-                      bgcolor: 'background.paper',
-                      mb: 2,
-                      borderRadius: 2,
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                      },
-                    }}
-                  >
-                    <Checkbox
-                      checked={todo.completed}
-                      onChange={() => handleToggleTodo(todo.id)}
-                      color="primary"
-                    />
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                          <Typography
-                            sx={{
-                              textDecoration: todo.completed ? 'line-through' : 'none',
-                              color: todo.completed ? 'text.secondary' : 'text.primary',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {todo.text}
-                          </Typography>
-                          <Chip
-                            label={todo.category}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                            sx={{ borderRadius: 1.5 }}
-                          />
-                          <Chip
-                            label={todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
-                            size="small"
-                            color={getPriorityColor(todo.priority)}
-                            sx={{ borderRadius: 1.5 }}
-                          />
-                          {todo.dueDate && (
-                            <Chip
-                              label={todo.dueDate.toLocaleDateString('ja-JP')}
-                              size="small"
-                              color="info"
-                              variant="outlined"
-                              icon={<EventIcon />}
-                              sx={{ borderRadius: 1.5 }}
-                            />
-                          )}
-                        </Box>
-                      }
-                    />
-                    <ListItemSecondaryAction>
-                      <Tooltip title="削除">
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => handleDeleteTodo(todo.id)}
+              {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                  <CircularProgress />
+                </Box>
+              ) : filteredAndSortedTodos.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <List sx={{ mt: 2 }}>
+                  {filteredAndSortedTodos.map((todo) => (
+                    <ListItem
+                      key={todo.id}
+                      sx={{
+                        bgcolor: 'background.paper',
+                        mb: 2,
+                        borderRadius: 2,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        },
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        gap: { xs: 2, sm: 1 },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Checkbox
+                          checked={todo.completed}
+                          onChange={() => handleToggleTodo(todo.id)}
+                          color="primary"
+                        />
+                        <Typography
                           sx={{
-                            color: 'error.light',
-                            '&:hover': {
-                              color: 'error.main',
-                            },
+                            textDecoration: todo.completed ? 'line-through' : 'none',
+                            color: todo.completed ? 'text.secondary' : 'text.primary',
+                            fontWeight: 500,
                           }}
+                        >
+                          {todo.text}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        <Chip
+                          label={todo.category}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          sx={{ borderRadius: 1.5 }}
+                        />
+                        <Chip
+                          label={todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
+                          size="small"
+                          color={getPriorityColor(todo.priority)}
+                          sx={{ borderRadius: 1.5 }}
+                        />
+                        {todo.dueDate && (
+                          <Chip
+                            label={todo.dueDate.toLocaleDateString('ja-JP')}
+                            size="small"
+                            color="info"
+                            variant="outlined"
+                            icon={<EventIcon />}
+                            sx={{ borderRadius: 1.5 }}
+                          />
+                        )}
+                      </Box>
+                      <Box sx={{ ml: { xs: 0, sm: 'auto' }, mt: { xs: 2, sm: 0 } }}>
+                        <IconButton
+                          onClick={() => handleDeleteTodo(todo.id)}
+                          color="error"
+                          sx={{ ml: 1 }}
                         >
                           <DeleteIcon />
                         </IconButton>
-                      </Tooltip>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            )}
+                      </Box>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
           </Paper>
         </Container>
       </Box>
